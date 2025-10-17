@@ -1,38 +1,54 @@
 <html>  
 <head>
-    <title>Modelo de Bauxita</title>
+    <title>Modelo de Bauxita - Variables Binarias</title>
+    <style>
+        .input-group { margin: 10px 0; }
+        label { display: inline-block; width: 120px; }
+        input { padding: 5px; width: 80px; }
+        .results { margin-top: 20px; padding: 15px; background: #f0f8ff; border-radius: 5px; }
+    </style>
 </head>
 <body>
     <h1>Modelo de Optimización - Bauxita</h1>
+    <h3>Ingresar valores para las variables binarias (0 o 1):</h3>
     
     <form method="post">
-        <h3>Ingresar costos fijos de plantas:</h3>
+        <div class="input-group">
+            <label for="W_B">W_B (Planta B):</label>
+            <input type="number" id="W_B" name="W_B" min="0" max="1" placeholder="0 o 1">
+        </div>
         
-        <input type="number" placeholder="Costo planta B" name="costo_B" required>
-        <br><br>
+        <div class="input-group">
+            <label for="W_C">W_C (Planta C):</label>
+            <input type="number" id="W_C" name="W_C" min="0" max="1" placeholder="0 o 1">
+        </div>
         
-        <input type="number" placeholder="Costo planta C" name="costo_C" required>
-        <br><br>
+        <div class="input-group">
+            <label for="W_D">W_D (Planta D):</label>
+            <input type="number" id="W_D" name="W_D" min="0" max="1" placeholder="0 o 1">
+        </div>
         
-        <input type="number" placeholder="Costo planta D" name="costo_D" required>
-        <br><br>
+        <div class="input-group">
+            <label for="W_E">W_E (Planta E):</label>
+            <input type="number" id="W_E" name="W_E" min="0" max="1" placeholder="0 o 1">
+        </div>
         
-        <input type="number" placeholder="Costo planta E" name="costo_E" required>
-        <br><br>
-
+        <br>
         <button type="submit">Ejecutar modelo</button>
     </form>
 
     {% if costo_total %}
+    <div class="results">
         <h2>Resultados:</h2>
         <p><strong>Costo total anual:</strong> ${{ "{:,.2f}".format(costo_total) }}</p>
         
-        <p><strong>Plantas que se abren:</strong></p>
+        <p><strong>Estado de plantas:</strong></p>
         <ul>
         {% for planta in plantas_abiertas %}
             <li>{{ planta }}</li>
         {% endfor %}
         </ul>
+    </div>
     {% endif %}
 </body>
 </html>

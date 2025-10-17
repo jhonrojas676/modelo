@@ -5,22 +5,22 @@ app = Flask(__name__)
 
 @app.route("/", methods=["GET", "POST"])
 def optimizar_bauxita():
-    # Inicializar variables
+    # Variables para resultados
     costo_total = None
     plantas_abiertas = []
     
     if request.method == "POST":
-        # Obtener los 4 costos del formulario
-        costo_B = int(request.form.get("costo_B"))
-        costo_C = int(request.form.get("costo_C"))
-        costo_D = int(request.form.get("costo_D"))
-        costo_E = int(request.form.get("costo_E"))
+        # Obtener los valores binarios ingresados por el usuario
+        W_B_input = request.form.get("W_B")
+        W_C_input = request.form.get("W_C")
+        W_D_input = request.form.get("W_D")
+        W_E_input = request.form.get("W_E")
         
-        print("Costos recibidos:")
-        print("Planta B:", costo_B)
-        print("Planta C:", costo_C)
-        print("Planta D:", costo_D)
-        print("Planta E:", costo_E)
+        print("Valores binarios ingresados:")
+        print("W_B:", W_B_input)
+        print("W_C:", W_C_input) 
+        print("W_D:", W_D_input)
+        print("W_E:", W_E_input)
         
         # EJECUTAR EL MODELO DE OPTIMIZACIÓN
         modelo = LpProblem("La_bauxita", LpMinimize)
@@ -30,7 +30,7 @@ def optimizar_bauxita():
         Y_jk = LpVariable.dicts("Y", (['B','C','D','E'], ['D','E']), lowBound=0)
         W_j = LpVariable.dicts("W", ['B','C','D','E'], cat='Binary')
         
-        # Función objetivo (USANDO LOS COSTOS INGRESADOS)
+        # Función objetivo
         Costo_explotacion = (
             420*(X_ij['A']['B'] + X_ij['A']['C'] + X_ij['A']['D'] + X_ij['A']['E']) +
             360*(X_ij['B']['B'] + X_ij['B']['C'] + X_ij['B']['D'] + X_ij['B']['E']) +
@@ -60,12 +60,11 @@ def optimizar_bauxita():
             1510*Y_jk['B']['E'] + 940*Y_jk['C']['E'] + 1615*Y_jk['D']['E'] 
         )   
         
-        # ✅ USAMOS LOS COSTOS INGRESADOS POR EL USUARIO
         Costo_fijo_plantas = (
-            costo_B * W_j['B'] + 
-            costo_C * W_j['C'] + 
-            costo_D * W_j['D'] + 
-            costo_E * W_j['E']
+            3000000 * W_j['B'] + 
+            2500000 * W_j['C'] + 
+            4800000 * W_j['D'] + 
+            6000000 * W_j['E']
         )
 
         modelo += (
@@ -77,7 +76,7 @@ def optimizar_bauxita():
             Costo_fijo_plantas
         )
 
-        # Restricciones (las mismas)
+        # Restricciones normales
         modelo += X_ij['A']['B'] + X_ij['A']['C'] + X_ij['A']['D'] + X_ij['A']['E'] <= 36000
         modelo += X_ij['B']['B'] + X_ij['B']['C'] + X_ij['B']['D'] + X_ij['B']['E'] <= 52000
         modelo += X_ij['C']['B'] + X_ij['C']['C'] + X_ij['C']['D'] + X_ij['C']['E'] <= 28000
@@ -98,16 +97,26 @@ def optimizar_bauxita():
         modelo += 0.060 * X_ij['A']['D'] + 0.080 * X_ij['B']['D'] + 0.062 * X_ij['C']['D'] == Y_jk['D']['D'] + Y_jk['D']['E']
         modelo += 0.060 * X_ij['A']['E'] + 0.080 * X_ij['B']['E'] + 0.062 * X_ij['C']['E'] == Y_jk['E']['D'] + Y_jk['E']['E']
 
+        # ASIGNAR VALORES BINARIOS INGRESADOS POR EL USUARIO
+        if W_B_input is not None and W_B_input != '':
+            modelo += W_j['B'] == int(W_B_input)
+        if W_C_input is not None and W_C_input != '':
+            modelo += W_j['C'] == int(W_C_input)
+        if W_D_input is not None and W_D_input != '':
+            modelo += W_j['D'] == int(W_D_input)
+        if W_E_input is not None and W_E_input != '':
+            modelo += W_j['E'] == int(W_E_input)
+
         # Resolver el modelo
         modelo.solve()
 
         # Obtener resultados
         costo_total = value(modelo.objective)
         
-        # Ver qué plantas se abren
+        # Recopilar información de plantas
         for j in ['B','C','D','E']:
-            if value(W_j[j]) == 1:
-                plantas_abiertas.append(f"Planta {j}")
+            estado = "ABIERTA" if value(W_j[j]) == 1 else "CERRADA"
+            plantas_abiertas.append(f"Planta {j}: {estado}")
     
     return render_template("home.html", 
                          costo_total=costo_total,
