@@ -1,26 +1,38 @@
 <html>  
-    <head>
-
-
-        <title>Modelo de optimización</title>
-
-    </head>
-    <body>
-
-        <form method="post">
-
-            <input type="number" placeholder="Ingrese el primer costo" name="costo_1">
-            
-            <input type="number" placeholder="Ingrese el segundo costo" name="costo_2">
-
-            <button type="submit"> Ejecutar modelo </button>
-
-
-
-        </form>
-
-        {{costo_total}}
+<head>
+    <title>Modelo de Bauxita</title>
+</head>
+<body>
+    <h1>Modelo de Optimización - Bauxita</h1>
+    
+    <form method="post">
+        <h3>Ingresar costos fijos de plantas:</h3>
         
+        <input type="number" placeholder="Costo planta B" name="costo_B" required>
+        <br><br>
+        
+        <input type="number" placeholder="Costo planta C" name="costo_C" required>
+        <br><br>
+        
+        <input type="number" placeholder="Costo planta D" name="costo_D" required>
+        <br><br>
+        
+        <input type="number" placeholder="Costo planta E" name="costo_E" required>
+        <br><br>
 
-    </body>
+        <button type="submit">Ejecutar modelo</button>
+    </form>
+
+    {% if costo_total %}
+        <h2>Resultados:</h2>
+        <p><strong>Costo total anual:</strong> ${{ "{:,.2f}".format(costo_total) }}</p>
+        
+        <p><strong>Plantas que se abren:</strong></p>
+        <ul>
+        {% for planta in plantas_abiertas %}
+            <li>{{ planta }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
 </html>
